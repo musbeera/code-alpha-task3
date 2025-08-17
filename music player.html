@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Player</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #121212;
+        color: #fff;
+        text-align: center;
+        padding: 20px;
+    }
+    .player {
+        background: #1f1f1f;
+        padding: 20px;
+        border-radius: 15px;
+        max-width: 350px;
+        margin: auto;
+        box-shadow: 0 0 15px rgba(0,0,0,0.6);
+    }
+    .song-info {
+        margin: 10px 0;
+    }
+    .controls button {
+        background: #333;
+        border: none;
+        padding: 10px;
+        margin: 5px;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+    }
+    .controls button:hover {
+        background: #555;
+    }
+    .progress-container {
+        width: 100%;
+        background: #444;
+        height: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 10px 0;
+    }
+    .progress {
+        background: #1db954;
+        height: 100%;
+        width: 0%;
+        border-radius: 5px;
+    }
+    .volume {
+        margin-top: 10px;
+    }
+    ul {
+        list-style: none;
+        padding: 0;
+        margin-top: 15px;
+    }
+    li {
+        padding: 8px;
+        background: #222;
+        margin: 5px 0;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    li:hover {
+        background: #333;
+    }
+</style>
+</head>
+<body>
+
+<div class="player">
+    <h2>🎵 Music Player</h2>
+    <div class="song-info">
+        <h3 id="title">Song Title</h3>
+        <p id="artist">Artist Name</p>
+    </div>
+
+    <audio id="audio"></audio>
+
+    <div class="progress-container" id="progress-container">
+        <div class="progress" id="progress"></div>
+    </div>
+    <span id="current-time">0:00</span> / <span id="duration">0:00</span>
+
+    <div class="controls">
+        <button id="prev">⏮</button>
+        <button id="play">▶</button>
+        <button id="next">⏭</button>
+    </div>
+
+    <div class="volume">
+        Volume: <input type="range" id="volume" min="0" max="1" step="0.01">
+    </div>
+
+    <h4>Playlist</h4>
+    <ul id="playlist"></ul>
+</div>
+
+<script>
+
+const sampleSong = "data:audio/mpeg;base64,//uQxAAADc..." 
+
+const songs = [
+    { title: "Sample Song", artist: "Free Artist", src: sampleSong }
+];
+
+const audio = document.getElementById("audio");
+const title = document.getElementById("title");
+const artist = document.getElementById("artist");
+const playBtn = document.getElementById("play");
+const prevBtn = document.getElementById("prev");
+const nextBtn = document.getElementById("next");
+const progressContainer = document.getElementById("progress-container");
+const progress = document.getElementById("progress");
+const currentTimeEl = document.getElementById("current-time");
+const durationEl = document.getElementById("duration");
+const volumeSlider = document.getElementById("volume");
+const playlistEl = document.getElementById("playlist");
+
+let songIndex = 0;
+let isPlaying = false;
+
+function loadSong(song) {
+    title.textContent = song.title;
+    artist.textContent = song.artist;
+    audio.src = song.src;
+}
+function playSong() {
+    audio.play();
+    isPlaying = true;
+    playBtn.textContent = "⏸";
+}
+function pauseSong() {
+    audio.pause();
+    isPlaying = false;
+    playBtn.textContent = "▶";
+}
+function prevSong() {
+    songIndex = (songIndex - 1 + songs.length) % songs.length;
+    loadSong(songs[songIndex]);
+    playSong();
+}
+function nextSong() {
+    songIndex = (songIndex + 1) % songs.length;
+    loadSong(songs[songIndex]);
+    playSong();
+}
+function updateProgress(e) {
+    if (audio.duration) {
+        const progressPercent = (audio.currentTime / audio.duration) * 100;
+        progress.style.width = {progressPercent};
+
+        let currentMinutes = Math.floor(audio.currentTime / 60);
+        let currentSeconds = Math.floor(audio.currentTime % 60);
+        if (currentSeconds < 10) currentSeconds = "0" + currentSeconds;
+        
+
+        let durationMinutes = Math.floor(audio.duration / 60);
+        let durationSeconds = Math.floor(audio.duration % 60);
+        if (durationSeconds < 10) durationSeconds = "0" + durationSeconds;
+        
+    }
+}
+function setProgress(e) {
+    const width = this.clientWidth;
+    const clickX = e.offsetX;
+    audio.currentTime = (clickX / width) * audio.duration;
+}
+volumeSlider.addEventListener("input", () => {
+    audio.volume = volumeSlider.value;
+});
+function loadPlaylist() {
+    playlistEl.innerHTML = "";
+    songs.forEach((song, index) => {
+        const li = document.createElement("li");
+        li.textContent = {songtitle} - {songartist};
+        li.addEventListener("click", () => {
+            songIndex = index;
+            loadSong(songs[songIndex]);
+            playSong();
+        });
+        playlistEl.appendChild(li);
+    });
+}
+playBtn.addEventListener("click", () => {
+    isPlaying ? pauseSong() : playSong();
+});
+prevBtn.addEventListener("click", prevSong);
+nextBtn.addEventListener("click", nextSong);
+audio.addEventListener("timeupdate", updateProgress);
+progressContainer.addEventListener("click", setProgress);
+audio.addEventListener("ended", nextSong);
+
+loadSong(songs[songIndex]);
+loadPlaylist();
+volumeSlider.value = 0.5;
+audio.volume = 0.5;
+</script>
+
+</body>
+</html>
+
+
+
